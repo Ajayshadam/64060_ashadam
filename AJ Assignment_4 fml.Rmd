@@ -1,0 +1,303 @@
+---
+title: "Assignment FML_3"
+author: "Ajay Shadam"
+date: "2023-11-19"
+output: html_document
+---
+
+## SUMMARY
+
+For this project, I'll implement the k-implies gathering a position to conduct a non-various layered bunch inspection. In order to facilitate the extraction of crucial information, the data will be divided into coherent categories. The initial data set and the necessary bundles deserve to be stacked first. Data from roughly twenty-one pharmaceutical companies are included.
+
+The reasoning behind the decisions of market capitalization, leverage, rev growth, net profit margin, beta, PE ratio, ROE, and ROA
+The variables that have been chosen correspond to typical financial measures that are employed in business performance evaluation and comparative. Market Cap, Beta, PE Ratio, ROE, ROA, Turnover of Assets, Leverage, Rev Growth, and Net Profit Margin are a few of them. When taken as entirety, these factors provide an exhaustive picture of a company's productivity, profitability, and stability.
+
+1. The market capitalisation of pharmaceutical firms fluctuates between 0.41 to 199.47, representing their total worth and market value.
+
+2. Beta: The ranges from 0.18 to 1.11 which indicates the sensitivity of an organization's profits are to shifts in the market.
+
+3. PE Ratio: illustrates the amount that the stock of a company is worth when compared to its profits. It can fall between 3.6 to 82.5.
+
+4. Return on equity (ROI): It evaluates how well a business leverages the equity of shareholders in order to produce revenues and has a range of 3.9 to 62.9.
+
+5. ROA: 0.3 to 1.1. Evaluation of a company's capacity to generate income through its financial resources.
+
+6. How well a business uses its assets to generate revenue is shown by its asset turnover. In the range of 0.5 to 1.1
+
+7.Leverage: a measurement that ranges from 0 to 3.51 that indicates how much a company uses debt to fund its activities.
+
+8. Rev_Growth: Displays the revenue change as a percentage over a specified time period; values range from -3.17 to 34.21.
+
+9.Net Profit Margin: With a range of 2.6 to 25.54, this variable indicates the proportion of revenue that is turned into profit.
+
+Normalization of the data: The numerical variables need to be normalized in order for each variable to contribute proportionately to the clustering process. Because these variables may have multiple units or scales, normalization helps prevent one variable from dominating the clustering based only on its magnitude. On the other hand, Market Cap is in the hundreds, while Beta represents a fraction between 0 and 1.
+
+My preference for K-means clustering over DBSCAN stems from its frequent application in exploratory data analysis to identify patterns and groups within the data. K-means clustering can also provide insights into the financial profiles of pharmaceutical companies. When it comes to aiding investment research or strategic decision-making, DBSCAN is particularly helpful for datasets with dense regions since it may discover groupings of enterprises with similar financial characteristics. Moreover, it is easy to understand.A predefined number of clusters (k) is required for K-means analysis. Given the user's ability to select how many clusters to construct, this could be useful in some situations. The number of clusters can be difficult to decide between using hierarchical clustering and DBSCAN.
+
+Numerical variables are used to build five groups from the dataset. An analysis of every cluster is provided by taking into account financial ratios and performance measurements. Examples of cluster attributes include net profit margin, leverage, sales growth, ROA, and ROE.
+
+cluster 1: The order of moderate sell, moderate purchase, hold, and moderate sell is greatest to lowest. Originating in the US, the UK, and Switzerland, with the US ranking first, they are listed on the New York Stock Exchange.
+
+The firms in cluster 2 are evenly distributed among AMEX, NASDAQ, and NYSE. It also has a different Hold and Moderate Buy median, where the hold is bigger than the moderate buy, and a different count from the US and Germany.
+
+cluster 3: it is evenly distributed throughout the US and Canada, has equal Hold and Moderate Buy medians, and is only listed on the NYSE.
+
+cluster 4 is dispersed over the US and the UK, with similar hold and moderate buy medians, and it is also included on
+
+Cluster 5 consists of equal parts moderate buy and moderate sell. It is listed on the New York Stock Exchange and spread throughout France, Ireland, and the United States.
+
+We study the relationships between clusters and variables 10 to 12. Bar graphs within each cluster are used to display the frequency distribution of non-clustered variables.The appropriate names and an explanation are given below the bar graph using the bar graph.
+
+
+##PROBLEM STATEMENT
+
+An equities analyst is studying the pharmaceutical industry and would like your help in exploring and understanding the financial data collected by her firm. Her main objective is to understand the structure of the pharmaceutical industry using some basic financial measures. Financial data gathered on 21 firms in the pharmaceutical industry are available in the file Pharmaceuticals.csv Download Pharmaceuticals.csv. For each firm, the following variables are recorded:
+
+1.Market capitalization (in billions of dollars)
+
+2.Beta
+
+3.Price/earnings ratio
+
+4.Return on equity
+
+5.Return on assets
+
+6.Asset turnover
+
+7.Leverage
+
+8.Estimated revenue growth
+
+9.Net profit margin
+
+10.Median recommendation (across major brokerages)
+
+11.Location of firm’s headquarters
+
+12.Stock exchange on which the firm is listed
+
+Use cluster analysis to explore and analyze the given dataset as follows:
+
+Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on. Interpret the clusters with respect to the numerical variables used in forming the clusters. Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used in forming the clusters) Provide an appropriate name for each cluster using any or all of the variables in the dataset.
+
+
+
+#using install.packages() to install the required libraries and executing the necessary libraries 
+```{r}
+library(tidyverse)  # data manipulation
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+library(ggplot2)
+library(ISLR)
+library(gridExtra)
+library(flexclust)
+library(dbscan)
+
+```
+```{r}
+##introducing in and evaluating the dataset 
+DATA.FRAME <- read.csv("C:/Users/Ajay Reddy/Downloads/Pharmaceuticals.csv")
+head(DATA.FRAME)
+```
+##  1.Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on
+
+```{r}
+#To eliminate any possibility of values that are absent using the data
+A_DATA <- na.omit(DATA.FRAME)
+#Compiling numerical information to cluster 21 firms from columns 1 through 9.
+row.names(A_DATA)<- A_DATA[,1]
+AS<- A_DATA[, 3:11]
+head(AS)
+```
+```{r}
+##Scale function is implemented for normalizing the data.
+AS2<- scale(AS)
+head(AS2)
+```
+
+```{r}
+#Doing K-means clustering for different centers in R
+# Analyze the distinctions in what happens with various amounts of K.
+
+K_M <- kmeans(AS2, centers = 2, nstart = 30)
+K_M1<- kmeans(AS2, centers = 5, nstart = 30)
+K_M2<- kmeans(AS2, centers = 6, nstart = 30)
+SA1<-fviz_cluster(K_M, data = AS2)+ggtitle("k=2")
+SA2<-fviz_cluster(K_M1, data = AS2)+ggtitle("k=5")
+SA3<-fviz_cluster(K_M2, data = AS2)+ggtitle("k=6")
+grid.arrange(SA1,SA2,SA3, nrow = 2)
+```
+```{r}
+#To evaluate whichever radius or eps value seems best.
+
+# Utilize a graph to get an ideal radius at the lowest point of the number 4.
+dbscan::kNNdistplot(AS, k=4)
+```
+
+```{r}
+# DBSCAN Algorithm containing 30 eps and 4 minpts
+DBS <- dbscan::dbscan(AS, eps = 30, minPts = 4)
+
+# Output of the clusters
+print(DBS)
+```
+```{r}
+# To figure out which cluster a particular point belongs to
+print(DBS$cluster)
+```
+```{r}
+# Visualization of clusters
+fviz_cluster(DBS, AS) + ggtitle("DBSCAN Plot")
+```
+#I've decided for K-means over DBSCAN because it can provide information about the financial characteristics of pharmaceutical companies and since it's widely utilized in exploratory analysis of data to identify similarities and groupings in the data. DBSCAN can be helpful in demonstrating groups of enterprises with similar financial characteristics, which may be helpful in strategic decision-making and assessment of investments for datasets with dense areas. It is also easy to understand.The method known as K-means requires a fixed number of clusters, k. The user can decide exactly how many clusters to construct, and these may be useful in certain circumstances. The number of clusters may not be easily determined via DBSCAN or hierarchical clustering.
+
+```{r}
+# Hierarchical Clustering
+
+# Calculate the data's euclidean distance.
+M.M <- dist(AS2, method = "euclidean")
+
+# Hierarchical Clustering
+S.S <- hclust(M.M, method = "complete")
+
+# Displaying the resulting Dendrogram having a height of 5.
+plot(S.S, cex = 0.75, main = "Dendrogram of Hierarchical Clustering")
+rect.hclust(S.S, h=5, border = 1:5)
+```
+```{r}
+#Elbow methodology for determining necessary clusters
+DIS_ <-  dist(AS2, method = "euclidean")
+# for calculating
+#distance matrix the information matrices's rows together.
+fviz_dist(DIS_)# Visualizing a distance matrix
+
+```
+#The overall within-cluster sum of squares (wss) for each k should be determined. Tot.withinss corresponds to the entire within-cluster sum of squares. Determine and graph the wss for k = 1 to k = 10 and extract the wss for clusters 2–15. It is generally thought because the positioning of a bend, or knee, in the plot demonstrates that k = 5 is the appropriate number of clusters.
+
+```{r}
+set.seed(123)
+wss<- function(K){
+kmeans(AS2, K, nstart =10)$tot.withinss
+}
+k.values<- 1:10
+WSS_cluster<- map_dbl(k.values, wss)
+plot(k.values, WSS_cluster,
+     type="b", pch = 16, frame = TRUE,
+     xlab="Number of clusters",
+     ylab="Total within-clusters sum of squares")
+```
+#An elbow is able to be seen at position 2, as seen in the diagram above, although it continues to be unclear because of the less sharp graphic representation.
+
+```{r}
+#Using the approach for Silhouette below
+fviz_nbclust(AS2,kmeans,method="silhouette")
+```
+#Since K=5 is readily apparent by the Silhouette strategy, and their we are going to use it. #Complete analysis, 5 cluster the extraction process, and result visualisation
+
+```{r}
+set.seed(123)
+Sl<- kmeans(AS2, 5, nstart = 25)
+print(Sl)
+```
+
+```{r}
+fviz_cluster(Sl, data = AS2)
+```
+##2 Interpret the clusters with respect to the numerical variables used in forming the clusters.
+
+```{r}
+##comprehending each cluster with regard to of the numerical variables which have been used to create these individuals
+AS%>%
+  mutate(Cluster = Sl$cluster) %>%
+  group_by(Cluster)%>% summarise_all("mean")
+```
+```{r}
+clusplot(AS2,Sl$cluster, color = TRUE, labels = 2,lines = 0)
+```
+Cluster 1: AHM, SGP, WYE, BMY, AZN, ABT, NVS, LLY - This group features the lowest increase in sales and the greatest net profit margin. The aforementioned companies have moderate revenue growth and somewhat limited leverage. companies have an excellent overall return on equity and net profit margin, indicating that businesses offer an extensive array of profitable products. Thus, they don't have the option of using up all of their resources. These businesses feature minimal leverage due to the fact that they are able to borrow money from the capital marketplace.
+
+Cluster 2: BAY, CHTT, IVX: This cluster has poor ROA, growth in revenue, and net profit margin, but significant leverage and beta. The aforementioned companies are examples of creative start-ups in the sector. In comparison with these well-known brands, they are relatively cheap when speaking of market value, and few people are familiar with their name. Considering they are new, unproven companies without goods that are profitable that will create cash flow, they have low net profit margins and limited revenue growth. They have poor ROA and a high degree of leverage since they depend significantly on R&D. Considering they are going to make investments in the years to come, which denotes a high beta, their price will increase in a developing market.
+
+AGN and PHA in Cluster 3 AGN molecules and PHA constitute the only two companies in this cluster. It has the lowest beta, lowest ROA, lowest net profit margin, and highest P/E ratio.In spite of this, certain organizations have big plans for the future whereas historically generating little money. They may invest an immense amount of money in D&I in advanced technology, which is wherefore the market considers them highly. Investors do, however, assume greater danger due to its high price.
+
+The companies in Cluster 4—JNJ, MRK, PFE, and GSK—have the biggest market cap, as well as the highest ROE and ROA, net profit margin, turnover of assets, and low leverage. These companies represent the leaders in this sector thanks to their greatest market capitalizations and important positions within the industry. As seen by their low indebtedness values, high ROE, ROA, and constant turnover of assets, these businesses use capital incredibly well. Every money invested in these companies will primarily benefit them. They must have only a handful of top-selling, market-dominating products in addition to established products which require little in the way of capital or assets from the businesses but bring in big sums of cash and have substantial net profit margins (Pfizer is one such example).
+
+Cluster 5: AVE, MRX, WPI, and ELAN High revenue growth, low market capitalization, low P/E, a low employee turnover rate, and high beta are all present in this cluster. Low ROE, ROA, and turnover rates suggest that these conventional small-sized enterprises may not have very strong capital application capabilities. However, considering the robust rate of revenue growth, we can presume that either external market developments or internal reformation are pointing the companies in the correct path. The fact that their P/E ratio is the lowest further suggests that their share price is still low.
+
+##3 Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used informing the clusters)
+
+```{r}
+pattern_clue <- DATA.FRAME[12:14] %>% mutate(Clusters=Sl$cluster)
+ggplot(pattern_clue, mapping = aes(factor(Clusters), fill =Median_Recommendation))+geom_bar(position='dodge')+labs(x ='Clusters',y ='Frequence')
+```
+```{r}
+ggplot(pattern_clue, mapping = aes(factor(Clusters),fill = Location))+
+  geom_bar(position = 'dodge')+labs(x ='Clusters',y = 'Frequence')
+```
+```{r}
+ggplot(pattern_clue, mapping = aes(factor(Clusters),fill = Exchange))+geom_bar(position = 'dodge')+
+  labs(x ='Clusters',y = 'Frequence')
+```
+Cluster 1:
+The median recommendation indicates that Cluster 1 has a solid hold.
+
+Location: Of the three places in Cluster 1, the United States is more numerous than the United Kingdom and Switzerland.
+
+Exchange: There is only one exchange in Cluster 1, the NYSE, which is rather active.
+
+
+Cluster 2:
+Buy rating is low and hold rating is strong. This is the median recommendation for the cluster.
+
+Whereas Germany is ranked lower than the US in two sites within Cluster 2.
+
+Exchange: The three equally distributed exchanges in Cluster 2 are the AMEX, NASDAQ, and NYSE exchanges.
+
+
+Cluster 3:
+Median suggestion: The suggestion for Cluster 3 is a low purchase and a low hold.
+
+Location: The United States and Canada are the only two places in Cluster 3 that are uniformly distributed.
+
+Exchange: The NYSE is the sole exchange in Cluster 3.
+
+
+Cluster 4: 
+The median suggestion indicates that there is a high purchase and a high hold in this cluster.
+
+Location: Cluster 4 contains two locations, with a significant population difference between the US and the UK.
+
+Exchange: NYSE is the only exchange that exists in Cluster 4.
+
+
+
+Cluster 5: 
+Median Suggestion: There is a moderate purchase and moderate sell recommendation in Cluster 5.
+
+Location: There are three locations for Cluster 5, with the United States being the most notable.
+
+Exchange: The NYSE is the sole exchange that is a part of Cluster 5.
+
+
+##4 Provide an appropriate name for each cluster using any or all of the variables in the dataset.
+
+Certainly! Here are names for each cluster:
+
+1. Cluster 1: "Fortified Stability Portfolio"
+   - Elevated hold cluster.
+
+2. Cluster 2: "Resolute Holdings Mix"
+   - Hold cluster.
+
+3. Cluster 3: "Value-Oriented Bargain Hub"
+   - Cheapest cluster.
+
+4. Cluster 4: "Strategic Acquisition Ensemble"
+   - Purchase hold cluster.
+
+5. Cluster 5: "Dynamic Transaction Spectrum"
+   - Purchase sell cluster.
+
+These names provide a fresh perspective while still capturing the key characteristics of each cluster.
+
